@@ -4,8 +4,10 @@
 #include "ExpenseSummaryModule.h"
 #include "FileStorageModule.h"
 
+#include <iostream>
+
 int main()
 {
-    cout << "Creating a Personal Expense Tracker..." << endl;
+    std::cout << "Creating a Personal Expense Tracker..." << std::endl;
     return 0;
 }
