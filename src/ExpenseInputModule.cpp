@@ -1,6 +1,8 @@
-
+#include "Expense.h"
+#include "FileStorageModule.h"
 #include "ExpenseInputModule.h"
 
+#include <vector>
 #include <iostream>
 #include <limits>
 #include <string>
@@ -54,10 +56,24 @@ bool isValidDate(const std::string& date)
     return day >= 1 && day <= daysInMonth[month - 1];
 }
 
+int getNextExpenseId(const std::vector<Expense>& expenses)
+{
+    int highestId = 0;
+
+    for (const Expense& expense : expenses)
+    {
+        if (expense.expenseId > highestId)
+        {
+            highestId = expense.expenseId;
+        }
+    }
+
+    return highestId + 1;
+}
+
 void addExpense()
 {
     std::string description;
-    std::string amountInput;
     std::string date;
     int categoryId;
     double amount;
@@ -127,24 +143,57 @@ void addExpense()
         return;
     }
 
-    std::cout << "\nExpense input validated successfully!\n";
-    std::cout << "Description: " << description << '\n';
+    
+    std::vector<Expense> expenses;
+
+    // Load existing expense records.
+    if (!initializeStorage() || !loadExpenses(expenses))
+    {
+        std::cout << "Error: Could not load expense records.\n";
+        return;
+    }
+
+    // Create the new expense.
+    Expense newExpense;
+    newExpense.expenseId = getNextExpenseId(expenses);
+    newExpense.description = description;
+    newExpense.categoryId = categoryId;
+    newExpense.amount = amount;
+    newExpense.date = date;
+
+    // Add the expense to the collection.
+    expenses.push_back(newExpense);
+
+    // Save the updated collection.
+    if (!saveExpenses(expenses))
+    {
+        std::cout << "Error: Could not save the expense.\n";
+        return;
+    }
+
+    // Display the saved expense once.
+    std::cout << "\nExpense saved successfully!\n";
+    std::cout << "Expense ID: " << newExpense.expenseId << '\n';
+    std::cout << "Description: " << newExpense.description << '\n';
+
     std::cout << "Category: ";
 
-    switch (categoryId)
+    switch (newExpense.categoryId)
     {
-    case 1:
-        std::cout << "Food\n";
-        break;
-    case 2:
-        std::cout << "Transportation\n";
-        break;
-    case 3:
-        std::cout << "Utilities\n";
-        break;
+        case 1:
+            std::cout << "Food\n";
+            break;
+        case 2:
+            std::cout << "Transportation\n";
+            break;
+        case 3:
+            std::cout << "Utilities\n";
+            break;
     }
 
     std::cout << "Amount: " << std::fixed
-              << std::setprecision(2) << amount << '\n';
-    std::cout << "Date: " << date << '\n';
+              << std::setprecision(2)
+              << newExpense.amount << '\n';
+
+    std::cout << "Date: " << newExpense.date << '\n';
 }
