@@ -239,3 +239,84 @@ void updateExpense()
 
     cout << "\nExpense updated successfully!\n";
 }
+
+
+void deleteExpense()
+{
+    vector<Expense> expenses;
+
+    if (!initializeStorage() || !loadExpenses(expenses))
+    {
+        cout << "Error: Could not load expense records.\n";
+        return;
+    }
+
+    if (expenses.empty())
+    {
+        cout << "No expense records available to delete.\n";
+        return;
+    }
+
+    string idInput;
+    int expenseId;
+
+    cout << "\n========== DELETE EXPENSE ==========\n";
+    cout << "Enter expense ID: ";
+    getline(cin, idInput);
+
+    istringstream idStream(idInput);
+    char extra;
+
+    if (!(idStream >> expenseId) || (idStream >> extra) || expenseId <= 0)
+    {
+        cout << "Invalid expense ID. Please enter a valid positive number.\n";
+        return;
+    }
+
+    int expenseIndex = findExpenseById(expenses, expenseId);
+
+    if (expenseIndex == -1)
+    {
+        cout << "Expense record not found.\n";
+        return;
+    }
+
+    cout << "\nSelected Expense:\n";
+    cout << "Description : " << expenses[expenseIndex].description << endl;
+    cout << "Category ID : " << expenses[expenseIndex].categoryId << endl;
+    cout << "Amount      : " << expenses[expenseIndex].amount << endl;
+    cout << "Date        : " << expenses[expenseIndex].date << endl;
+
+    string confirmation;
+
+    cout << "\n[1] Confirm Delete\n";
+    cout << "[0] Cancel\n";
+    cout << "Select an option: ";
+
+    getline(cin, confirmation);
+
+    if (confirmation == "0")
+    {
+        cout << "Deletion cancelled.\n";
+        return;
+    }
+
+    if (confirmation != "1")
+    {
+        cout << "Invalid option. No expense was deleted.\n";
+        return;
+    }
+
+
+    // Remove the selected expense
+    expenses.erase(expenses.begin() + expenseIndex);
+
+    if (!saveExpenses(expenses))
+    {
+        cout << "Error: Could not save the changes.\n";
+        return;
+    }
+
+    cout << "\nExpense deleted successfully!\n";
+
+}

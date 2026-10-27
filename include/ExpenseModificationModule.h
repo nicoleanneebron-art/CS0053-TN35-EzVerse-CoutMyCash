@@ -5,5 +5,6 @@
 #include <vector>
 
 void updateExpense();
+void deleteExpense();
 
 #endif
