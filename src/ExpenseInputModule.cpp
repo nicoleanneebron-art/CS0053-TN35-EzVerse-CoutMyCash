@@ -147,7 +147,7 @@ void addExpense()
     std::vector<Expense> expenses;
 
     // Load existing expense records.
-    if (!initializeStorage() || !loadExpenses(expenses))
+    if (!loadExpenses(expenses))
     {
         std::cout << "Error: Could not load expense records.\n";
         return;
