@@ -1,3 +1,4 @@
+
 #include "ExpenseModificationModule.h"
 #include "Expense.h"
 #include "FileStorageModule.h"
@@ -5,10 +6,10 @@
 #include <vector>
 #include <iostream>
 #include <string>
-#include <limits>
 #include <cmath>
 #include <sstream>
 #include <cctype>
+#include <iomanip>
 
 using namespace std;
 
@@ -24,6 +25,54 @@ static int findExpenseById(const vector<Expense> &expenses, int expenseId)
     }
 
     return -1;
+}
+
+// Read and validate an expense ID
+static bool readExpenseId(int &expenseId)
+{
+    string idInput;
+
+    cout << "Enter expense ID: ";
+    getline(cin, idInput);
+
+    istringstream idStream(idInput);
+    char extra;
+
+    if (!(idStream >> expenseId) || (idStream >> extra) || expenseId <= 0)
+    {
+        cout << "Invalid expense ID. Please enter a valid positive number.\n";
+        return false;
+    }
+
+    return true;
+}
+
+// Display the details of an expense
+static void displayExpense(const Expense &expense)
+{
+    string categoryName;
+
+    switch (expense.categoryId)
+    {
+    case 1:
+        categoryName = "Food";
+        break;
+    case 2:
+        categoryName = "Transportation";
+        break;
+    case 3:
+        categoryName = "Utilities";
+        break;
+    default:
+        categoryName = "Unknown";
+        break;
+    }
+
+    cout << "Expense ID  : " << expense.expenseId << endl;
+    cout << "Description : " << expense.description << endl;
+    cout << "Category    : " << categoryName << endl;
+    cout << "Amount      : " << fixed << setprecision(2) << expense.amount << endl;
+    cout << "Date        : " << expense.date << endl;
 }
 
 // Validate the date and check for leap years
@@ -83,20 +132,14 @@ void updateExpense()
     }
 
     int expenseId;
-    string idInput;
 
     cout << "\n========== UPDATE EXPENSE ==========\n";
-    cout << "Enter expense ID: ";
-    getline(cin, idInput);
 
-    istringstream idStream(idInput);
-    char extra;
-
-    if (!(idStream >> expenseId) || (idStream >> extra) || expenseId <= 0)
+    if (!readExpenseId(expenseId))
     {
-        cout << "Invalid expense ID. Please enter a valid positive number.\n";
         return;
     }
+
     int expenseIndex = findExpenseById(expenses, expenseId);
 
     if (expenseIndex == -1)
@@ -108,10 +151,7 @@ void updateExpense()
     Expense updatedExpense = expenses[expenseIndex];
 
     cout << "\nSelected Expense:\n";
-    cout << "Description : " << expenses[expenseIndex].description << endl;
-    cout << "Category ID : " << expenses[expenseIndex].categoryId << endl;
-    cout << "Amount      : " << expenses[expenseIndex].amount << endl;
-    cout << "Date        : " << expenses[expenseIndex].date << endl;
+    displayExpense(updatedExpense);
 
     string newDescription;
 
@@ -162,7 +202,8 @@ void updateExpense()
 
     string newAmount;
 
-    cout << "\nCurrent Amount: " << updatedExpense.amount << endl;
+    cout << "\nCurrent Amount: " << fixed << setprecision(2)
+         << updatedExpense.amount << endl;
     cout << "New Amount (Enter to keep current): ";
     getline(cin, newAmount);
 
@@ -186,6 +227,7 @@ void updateExpense()
 
         updatedExpense.amount = amount;
     }
+
     string newDate;
 
     cout << "\nCurrent Date: " << updatedExpense.date << endl;
@@ -202,13 +244,11 @@ void updateExpense()
 
         updatedExpense.date = newDate;
     }
+
     string confirmation;
 
     cout << "\n========== CONFIRM UPDATE ==========\n";
-    cout << "Description : " << updatedExpense.description << endl;
-    cout << "Category ID : " << updatedExpense.categoryId << endl;
-    cout << "Amount      : " << updatedExpense.amount << endl;
-    cout << "Date        : " << updatedExpense.date << endl;
+    displayExpense(updatedExpense);
 
     cout << "\n[1] Save Changes\n";
     cout << "[0] Cancel\n";
@@ -240,7 +280,6 @@ void updateExpense()
     cout << "\nExpense updated successfully!\n";
 }
 
-
 void deleteExpense()
 {
     vector<Expense> expenses;
@@ -257,19 +296,12 @@ void deleteExpense()
         return;
     }
 
-    string idInput;
     int expenseId;
 
     cout << "\n========== DELETE EXPENSE ==========\n";
-    cout << "Enter expense ID: ";
-    getline(cin, idInput);
 
-    istringstream idStream(idInput);
-    char extra;
-
-    if (!(idStream >> expenseId) || (idStream >> extra) || expenseId <= 0)
+    if (!readExpenseId(expenseId))
     {
-        cout << "Invalid expense ID. Please enter a valid positive number.\n";
         return;
     }
 
@@ -282,10 +314,7 @@ void deleteExpense()
     }
 
     cout << "\nSelected Expense:\n";
-    cout << "Description : " << expenses[expenseIndex].description << endl;
-    cout << "Category ID : " << expenses[expenseIndex].categoryId << endl;
-    cout << "Amount      : " << expenses[expenseIndex].amount << endl;
-    cout << "Date        : " << expenses[expenseIndex].date << endl;
+    displayExpense(expenses[expenseIndex]);
 
     string confirmation;
 
@@ -307,7 +336,6 @@ void deleteExpense()
         return;
     }
 
-
     // Remove the selected expense
     expenses.erase(expenses.begin() + expenseIndex);
 
@@ -318,5 +346,4 @@ void deleteExpense()
     }
 
     cout << "\nExpense deleted successfully!\n";
-
 }
